@@ -19,6 +19,57 @@ python main.py
 要求：Python 3.10+，支持 OpenGL 3.3 的显卡/驱动。
 存档位于 `saves/world1.db`，删除该文件即开新世界（种子在 settings.py）。
 
+## 项目结构
+
+```
+pycraft/
+├── main.py                  # 入口：窗口、主循环、各系统装配
+├── settings.py              # 全局配置（渲染距离、日长、按键、物理常数）
+│
+├── engine/                  # 渲染引擎层（与游戏逻辑解耦）
+│   ├── camera.py            # 第一人称相机（视角矩阵、投影矩阵）
+│   ├── frustum.py           # 视锥剔除
+│   ├── mesh_builder.py      # ★ numpy 向量化区块网格生成（核心性能模块）
+│   ├── renderer.py          # ModernGL 渲染管线：区块 / 实体 / 天空 / 粒子
+│   ├── shaders.py           # 内嵌 GLSL（区块、实体、天空穹顶、雨雪粒子、HUD）
+│   └── texture_atlas.py     # 程序化生成 16×16 像素风纹理图集
+│
+├── world/                   # 世界与地形
+│   ├── chunk.py             # 区块：numpy 数据 + 脏标记 + 网格缓存
+│   ├── world.py             # 区块管理、跨区块 get/set_block、异步加载队列
+│   ├── perlin.py            # ★ numpy 向量化柏林噪声 (2D/3D + FBM)
+│   ├── terrain.py           # 地形生成：高度图、生物群系、树、水面
+│   └── raycast.py           # DDA 体素射线（准星指向哪个方块）
+│
+├── physics/
+│   └── physics.py           # AABB 实体 vs 体素网格的扫掠碰撞、重力
+│
+├── systems/                 # 环境系统
+│   ├── time_system.py       # 游戏内时间、日出日落角度
+│   ├── sky.py               # 天空颜色渐变、太阳/月亮绘制、雾色联动
+│   └── weather.py           # 天气状态机 + 雨/雪粒子
+│
+├── content/                 # ★ 内容定义层（玩家二次开发主要改这里）
+│   ├── registry.py          # 方块/物品/实体 注册表（核心扩展机制）
+│   ├── blocks.py            # 所有方块定义（一行一个，数据驱动）
+│   ├── items.py             # 所有物品定义
+│   └── interactions.py      # 方块交互回调（右键、踩踏、相邻更新等）
+│
+├── entities/
+│   ├── entity.py            # Entity 基类（位置、AABB、速度、序列化）
+│   ├── mob.py               # MobBase：AI 状态机骨架（idle/wander/jump）
+│   ├── player.py            # 玩家：输入 → 移动意图 → 物理
+│   └── mobs/
+│       ├── slime.py         # 史莱姆：跳跃移动、落地压扁动画
+│       └── pig.py           # 猪：随机游走、转头
+│
+├── persistence/
+│   └── savegame.py          # SQLite 存档：脏区块差量保存、自动存档
+│
+└── ui/
+    └── hud.py               # 准星、物品热栏、FPS/时间/天气调试信息
+```
+
 ## 操作
 
 | 按键 | 功能 |
