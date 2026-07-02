@@ -3,7 +3,7 @@
 > VoxelCraft is a high-performance voxel game framework written entirely in pure Python and **generated from scratch by Claude Fable 5**.  
 > Inspired by Minecraft, it features numpy vectorization for fast chunk updates, rich physics (explosions with debris, falling sand, bouncy pads, etc.), flowing water, day-night cycles, villages, and mobs — all running smoothly at stable 60 FPS.
 
-**本项目说明**：
+**本说明**：
 
 这个仓库主要用来记录我对 **Claude Code + Fable5** 的尝鲜实验。  
 项目里几乎所有内容（架构设计、核心代码、物理系统、世界生成、扩展机制等）都是由 **Claude Fable 5 一口气生成**的，我只做了三次小改动。
@@ -15,7 +15,7 @@
 
 ---
 
-**English Version**：  
+**English**：  
 This repo is mainly a record of my experiment playing with **Claude Code + Fable 5**. Almost everything (architecture, core systems, physics, world generation, extensibility) was generated in one go by Claude Fable 5. I only made three small modifications.
 
 It's straightforward to run and has been performance-optimized. My main job here was just throwing wild ideas and requirements at the AI.
