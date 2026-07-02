@@ -1,8 +1,26 @@
 # Fable5-VoxelCraftGame
-VoxelCraft is a high-performance voxel game framework written entirely in pure Python and generated from scratch by Claude Fable 5. Inspired by Minecraft, it leverages numpy vectorization for fast chunk updates, features rich physics, flowing water, day-night cycles, villages, and mobs — all running smoothly at 60 FPS.
 
-该项目主要作为记录对Claude Code Fable5的尝鲜，所有内容均为Claude Code Fable5一口气生成，仅进行了三次改动的结果，运行方式很直接且进行了性能优化的工作
+> VoxelCraft is a high-performance voxel game framework written entirely in pure Python and **generated from scratch by Claude Fable 5**.  
+> Inspired by Minecraft, it features numpy vectorization for fast chunk updates, rich physics (explosions with debris, falling sand, bouncy pads, etc.), flowing water, day-night cycles, villages, and mobs — all running smoothly at stable 60 FPS.
 
+**本项目说明**：
+
+这个仓库主要用来记录我对 **Claude Code + Fable5** 的尝鲜实验。  
+项目里几乎所有内容（架构设计、核心代码、物理系统、世界生成、扩展机制等）都是由 **Claude Fable 5 一口气生成**的，我只做了三次小改动。
+
+运行方式非常直接，且做了性能优化工作。我在这里的主要贡献就是“天马行空地提需求”😂
+
+欢迎任何感兴趣的人直接拿去用、改、商用、闭源都行，**没有任何限制**。  
+出问题的话……那就是 Claude Code 自己的问题了（狗头）
+
+---
+
+**English Version**：  
+This repo is mainly a record of my experiment playing with **Claude Code + Fable 5**. Almost everything (architecture, core systems, physics, world generation, extensibility) was generated in one go by Claude Fable 5. I only made three small modifications.
+
+It's straightforward to run and has been performance-optimized. My main job here was just throwing wild ideas and requirements at the AI.
+
+Feel free to take, modify, use commercially, or close-source it — **no restrictions whatsoever**. If there are bugs… well, that's on Claude Code (😏).
 # VoxelCraft
 
 > **一个完全由 Claude Fable 5 从零生成的纯 Python 高性能体素游戏框架**
