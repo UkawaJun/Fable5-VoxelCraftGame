@@ -55,6 +55,14 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## 💾 存档与新世界
+
+- **当前存档位置**：`saves/world1.db`
+- **开新地图**：直接删除 `world1.db` 文件，下次启动会用新种子生成全新世界。
+- **固定地图种子**：修改 `settings.py` 中的 `WORLD_SEED` 值，然后删除旧存档即可。
+- **同时存在多个世界**：修改 `settings.py` 中的 `WORLD_NAME`，不同名字会生成独立的存档文件。
+- **手动存档**：游戏内按 **F5**，或直接退出游戏（会自动保存）。
+
 **要求**：Python 3.10+，支持 OpenGL 3.3 的显卡。
 
 存档位于 `saves/world1.db`，删除该文件即可用新种子开新世界（种子可在 `settings.py` 中修改）。
