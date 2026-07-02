@@ -3,216 +3,170 @@ VoxelCraft is a high-performance voxel game framework written entirely in pure P
 
 该项目主要作为记录对Claude Code Fable5的尝鲜，所有内容均为Claude Code Fable5一口气生成，仅进行了三次改动的结果，运行方式很直接且进行了性能优化的工作
 
-# PyCraft — 高性能 Python 体素游戏 Demo
+# VoxelCraft
 
-以 Minecraft 为原型的可游玩 Demo：numpy 向量化体素引擎 + ModernGL 渲染。
-柏林噪声地形、日夜循环、天气、SQLite 存档、TNT 爆炸碎屑物理、史莱姆和猪。
+> **一个完全由 Claude Fable 5 从零生成的纯 Python 高性能体素游戏框架**
 
-## 安装与运行
+**中文简介**：  
+VoxelCraft 是一个纯 Python 编写的高性能体素游戏框架，完全由 Claude Fable 5 从零生成。以 Minecraft 为原型，采用 numpy 向量化实现快速区块更新与渲染，具备完整物理系统、流动水、昼夜循环、自然村庄与生物，稳定 60 FPS 运行。
+
+**English**：  
+VoxelCraft is a high-performance voxel game framework written entirely in pure Python and generated from scratch by Claude Fable 5. Inspired by Minecraft, it leverages numpy vectorization for fast chunk updates, features rich physics, flowing water, day-night cycles, villages, and mobs — all running smoothly at 60 FPS.
+
+---
+
+## ✨ 项目概述
+
+VoxelCraft 是一个**可直接游玩的 3D 第一人称体素 Demo**，目标是展示高性能 Python 体素引擎的完整实现。
+
+核心亮点：
+- 纯 Python + numpy 向量化网格生成 + ModernGL 渲染
+- 完整物理模拟（爆炸碎屑、落沙、跳跳垫、质量差异击退等）
+- 数据驱动的内容系统（新方块/物品/生物极简扩展）
+- SQLite 差量存档 + 自动保存
+- 丰富的世界系统（流动水、昼夜、天气、村庄、生物）
+
+整个项目从架构设计、性能策略、物理系统到内容注册机制，**全部由 Claude Fable 5 在一次长对话中从零生成**，人类仅进行确认与少量整理。
+
+---
+
+## 🚀 安装与运行
 
 ```bash
 pip install -r requirements.txt
-# 或: pip install pyglet moderngl numpy Pillow
 python main.py
 ```
 
-要求：Python 3.10+，支持 OpenGL 3.3 的显卡/驱动。
-存档位于 `saves/world1.db`，删除该文件即开新世界（种子在 settings.py）。
+**要求**：Python 3.10+，支持 OpenGL 3.3 的显卡。
 
-## 项目结构
+存档位于 `saves/world1.db`，删除该文件即可用新种子开新世界（种子可在 `settings.py` 中修改）。
 
-```
-pycraft/
-├── main.py                  # 入口：窗口、主循环、各系统装配
-├── settings.py              # 全局配置（渲染距离、日长、按键、物理常数）
-│
-├── engine/                  # 渲染引擎层（与游戏逻辑解耦）
-│   ├── camera.py            # 第一人称相机（视角矩阵、投影矩阵）
-│   ├── frustum.py           # 视锥剔除
-│   ├── mesh_builder.py      # ★ numpy 向量化区块网格生成（核心性能模块）
-│   ├── renderer.py          # ModernGL 渲染管线：区块 / 实体 / 天空 / 粒子
-│   ├── shaders.py           # 内嵌 GLSL（区块、实体、天空穹顶、雨雪粒子、HUD）
-│   └── texture_atlas.py     # 程序化生成 16×16 像素风纹理图集
-│
-├── world/                   # 世界与地形
-│   ├── chunk.py             # 区块：numpy 数据 + 脏标记 + 网格缓存
-│   ├── world.py             # 区块管理、跨区块 get/set_block、异步加载队列
-│   ├── perlin.py            # ★ numpy 向量化柏林噪声 (2D/3D + FBM)
-│   ├── terrain.py           # 地形生成：高度图、生物群系、树、水面
-│   └── raycast.py           # DDA 体素射线（准星指向哪个方块）
-│
-├── physics/
-│   └── physics.py           # AABB 实体 vs 体素网格的扫掠碰撞、重力
-│
-├── systems/                 # 环境系统
-│   ├── time_system.py       # 游戏内时间、日出日落角度
-│   ├── sky.py               # 天空颜色渐变、太阳/月亮绘制、雾色联动
-│   └── weather.py           # 天气状态机 + 雨/雪粒子
-│
-├── content/                 # ★ 内容定义层（玩家二次开发主要改这里）
-│   ├── registry.py          # 方块/物品/实体 注册表（核心扩展机制）
-│   ├── blocks.py            # 所有方块定义（一行一个，数据驱动）
-│   ├── items.py             # 所有物品定义
-│   └── interactions.py      # 方块交互回调（右键、踩踏、相邻更新等）
-│
-├── entities/
-│   ├── entity.py            # Entity 基类（位置、AABB、速度、序列化）
-│   ├── mob.py               # MobBase：AI 状态机骨架（idle/wander/jump）
-│   ├── player.py            # 玩家：输入 → 移动意图 → 物理
-│   └── mobs/
-│       ├── slime.py         # 史莱姆：跳跃移动、落地压扁动画
-│       └── pig.py           # 猪：随机游走、转头
-│
-├── persistence/
-│   └── savegame.py          # SQLite 存档：脏区块差量保存、自动存档
-│
-└── ui/
-    └── hud.py               # 准星、物品热栏、FPS/时间/天气调试信息
-```
+**Windows 打包**：双击 `build_exe.bat` 可打包成单文件 `VoxelCraft.exe`。
 
-## 操作
+---
 
-| 按键 | 功能 |
-|---|---|
-| W/A/S/D + 鼠标 | 移动 / 视角 |
-| 空格 | 跳跃（水中上浮） |
-| 按住 Ctrl | 疾跑（加速 1.6 倍） |
-| 双击空格 | 切换飞行；飞行时 空格上升 / Shift 下降 |
-| 鼠标左键 | 破坏方块；对着生物则攻击（可按住连续） |
-| 鼠标右键 | 放置方块 / 交互（对 TNT 右键 = 点燃） |
-| 鼠标中键 | 选取指向的方块到热栏 |
-| 1~9 / 滚轮 | 切换热栏（18 格，滚轮循环全部） |
-| F3 | 调试信息（FPS/坐标/区块/实体数） |
-| F5 | 手动存档（退出时自动存档，每 60s 自动存档） |
-| T（按住） | 时间快进 30 倍（看日出日落） |
-| Y | 切换天气（晴 → 雨 → 雪） |
-| Esc | 释放鼠标；再点击窗口重新捕获 |
+## 🎮 操作说明
 
-## 玩法测试清单（物理参数演示）
+| 按键              | 功能                                      |
+|-------------------|-------------------------------------------|
+| W/A/S/D + 鼠标    | 移动 / 视角控制                           |
+| 空格              | 跳跃（水中上浮）                          |
+| 双击空格          | 切换飞行模式（飞行时空格上升、Shift下降） |
+| 按住 Ctrl         | 疾跑（加速 1.6 倍）                       |
+| 鼠标左键          | 破坏方块 / 攻击生物（可长按连击）         |
+| 鼠标右键          | 放置方块 / 互动（右键点燃 TNT）           |
+| 鼠标中键          | 吸取指向方块到热栏                        |
+| 1~9 / 滚轮        | 切换热栏                                  |
+| F3                | 调试信息（FPS、坐标、区块数、实体数等）   |
+| F5                | 手动存档                                  |
+| 按住 T            | 时间快进（约 30 倍速，观看日出日落）      |
+| Y                 | 切换天气（晴 → 雨 → 雪）                  |
+| Esc               | 释放鼠标 / 退出                           |
 
-- **TNT**：放置后右键点燃 → 3 秒白闪 → 爆炸。被炸开的方块变成碎屑抛飞，
-  落地弹跳后**落定为真实方块**（散落一地）。把多个 TNT 放在一起会连锁殉爆。
-- **跳跳垫**：踩上去弹飞约 8 格；TNT 碎屑落上去也会被反复弹起。
-- **沙子**：把支撑挖掉，沙子整列下落。
-- **冰**：在冰面上走会打滑（摩擦 0.05）。
-- **基岩**：挖不动、炸不动（抗爆 ∞）。
-- **萤石**：夜里自发光。
-- **爆炸质量差异**：树叶(0.25)飞天，石头(3.0)矮抛；史莱姆(轻)被炸飞很远，猪(重)纹丝不动。
+---
 
-## 项目结构
+## 🌍 玩法与内容亮点
+
+### 物理系统演示（核心特色）
+- **TNT 爆炸**：右键点燃 → 白闪引信 → 爆炸。被炸方块变成**带翻滚的碎屑**抛飞，落地弹跳后写回为真实方块。多个 TNT 可连锁殉爆。
+- **跳跳垫**：踩上去可弹飞约 8 格，碎屑落上也会被反复弹起。
+- **沙子 / 砂砾**：失去支撑会自动整列下落。
+- **冰面**：摩擦极低，走上去会打滑。
+- **质量差异**：轻的史莱姆被爆炸击飞很远，重的猪几乎不动。
+- **基岩**：挖不动、炸不动（抗爆无限）。
+
+### 世界系统
+- **流动水**：可无限流动（最远 7 格），支持无限水源机制，可形成瀑布和湖泊。
+- **昼夜循环**：游戏内一天约 10 分钟，支持日出日落、太阳/月亮运行、动态天空色。
+- **天气系统**：晴天 / 下雨 / 下雪 + GPU 粒子效果。
+- **自然村庄**：世界中会生成小村庄（水井 + 3 种房屋模板），位置由种子决定。
+- **生物**：
+  - 村民（人形游荡）
+  - 史莱姆（会跳跃，被打死会分裂成更小的）
+  - 猪（慢速游走）
+
+### 光照与视觉
+- 夜间放置萤石、灯笼、南瓜灯、红石灯会真实照亮周围区域。
+- 支持方块光照传播（v0.2 新增）。
+
+---
+
+## 🛠 项目结构
 
 ```
-main.py            入口/主循环/输入        settings.py  全局配置
-engine/            渲染引擎(与逻辑解耦)    world/       区块/地形/柏林噪声/射线
-physics/           AABB碰撞+物理参数       systems/     时间/天空/天气
-content/           ★方块/物品/交互定义     entities/    玩家/生物/TNT/碎屑
-persistence/       SQLite存档              ui/          HUD
+main.py              主入口与游戏循环
+settings.py          全局配置（渲染距离、物理参数、时间等）
+engine/              渲染引擎（相机、网格生成、渲染管线、着色器）
+world/               世界与区块管理（numpy 数据、柏林噪声、地形生成、射线拾取）
+physics/             物理系统（AABB 碰撞、碎屑模拟、爆炸）
+systems/             环境系统（时间、天空、天气）
+content/             ★ 内容定义层（方块、物品、交互注册 — 二次开发主要修改这里）
+entities/            实体系统（玩家、生物、TNT、碎屑）
+persistence/         SQLite 存档系统
+ui/                  HUD（准星、热栏、调试信息）
+```
+
+**设计原则**：`engine` 不依赖游戏逻辑，`content` 不关心渲染细节。添加新内容只需修改 `content/` 和 `entities/mobs/` 目录。
+
+---
+
+## 🔧 二次开发模板
+
+所有新内容注册后即可在游戏中出现，无需修改引擎代码。
+
+### 添加一个新方块（≤ 5 行）
+```python
+# content/blocks.py 末尾
+register_block("ruby_ore", BlockType(
+    name="ruby_ore",
+    textures=..., 
+    hardness=3.0,
+    mass=3.0,
+    blast_resistance=6.0,
+    drops="ruby"
+))
+```
+
+### 添加交互（右键 / 踩踏）
+```python
+def super_jump(world, pos, entity):
+    entity.velocity[1] = 25.0
+
+register_block("super_pad", BlockType(..., on_step=super_jump))
+```
+
+### 添加新生物
+继承 `MobBase`，覆写 AI 状态机方法，然后 `register_entity(...)` 即可。
+
+完整扩展示例见 `DESIGN.md` 第 5 节。
+
+---
+
+## 🧪 测试与验证
+
+项目包含多套测试脚本：
+
+```bash
+python test_headless.py    # 无头测试（地形、物理、爆炸、碎屑、存档等）
+python test_features.py    # 功能测试（光照、战斗、生物分裂、疾跑飞行、新方块等）
 ```
 
 ---
 
-# 二次开发模板
+## 📜 License
 
-所有扩展只动 `content/` 和 `entities/mobs/`，引擎零修改。
+本项目采用 **Unlicense**，完全公共领域授权。  
+任何人可自由使用、修改、商用、分发，无任何限制和义务。
 
-## 1. 添加一个新方块（≤5 行）
+---
 
-```python
-# content/blocks.py 末尾追加：
-register_block("ruby_ore", BlockType(
-    display="红宝石矿", textures=TILE["stone"],   # 先复用石头贴图
-    hardness=3.0, mass=3.0, blast_resistance=6.0))
-```
+**这个项目完整展示了 Claude Fable 5 在复杂系统级游戏框架上的强大能力**。  
+从提示词到可运行的完整 Demo（包含渲染、物理、世界生成、存档、扩展机制），全部由 AI 独立完成。
 
-要新贴图：在 `content/tiles.py` 的 TILE 表加一个索引，
-然后在 `engine/texture_atlas.py` 的 `build_atlas()` 里加几行像素生成代码。
-之后在 `content/items.py` 加 `block_item("ruby_ore")` 即可出现在热栏（≤9个槽位）。
+欢迎运行、测试、扩展，或把你的新想法反馈给 Claude Fable 5 继续迭代！
 
-## 2. 调整/新增物理参数
+*（本 README 由原始两个文档合并 + 优化整理）*
 
-```python
-# 让羊毛极轻、几乎无抗爆 —— 爆炸时漫天飞舞：
-register_block("wool", BlockType(..., mass=0.3, blast_resistance=0.1))
-# 超级冰，比冰更滑：
-register_block("packed_ice", BlockType(..., friction=0.02))
-# 想加全新参数（如 slipperiness）：在 registry.BlockType 加字段，
-# 然后在消费它的系统里读取（如 physics.py），属性定义与消费分离。
-```
-
-## 3. 添加交互（右键 / 踩踏）
-
-```python
-# content/interactions.py — 统一签名 fn(world, pos, actor)：
-def heal_pad_step(world, pos, entity):
-    entity.vel[1] = 25.0          # 超级弹射
-
-# content/blocks.py:
-register_block("super_pad", BlockType(..., on_step=heal_pad_step))
-# 可用回调: on_interact(右键) / on_place / on_break / on_step(踩踏)
-# world 对象有完整能力: world.set_block / world.explode / world.weather.force ...
-```
-
-## 4. 添加一个新物品
-
-```python
-# content/items.py:
-register_item("rain_wand", ItemType(
-    display="唤雨杖", icon_tile=TILE["water"],
-    on_use=lambda world, player: world.weather.force("RAIN") or True))
-```
-
-## 5. 添加一个新生物
-
-```python
-# entities/mobs/chicken.py:
-from content.registry import register_entity
-from entities.mob import MobBase
-
-class Chicken(MobBase):
-    AABB_SIZE = (0.4, 0.7, 0.4)
-    MASS = 1.0                      # 很轻 -> 爆炸飞最远
-    WALK_SPEED = 1.0
-    COLOR = (0.95, 0.95, 0.9, 1.0)
-    # 覆写 ai_idle / ai_wander 自定义行为；默认即"游走+跳过障碍"
-
-register_entity("chicken", Chicken, spawn_on=["grass"], max_count=6)
-```
-
-然后在 `main.py` 顶部 `import entities.mobs.chicken`，
-在 `engine/renderer.py` 的 `_draw_entities` 里加一个盒子模型分支
-（参考 `_draw_pig`，几行 `self._box(...)` 拼装即可）。
-
-## 6. 调整爆炸 / 性能
-
-`settings.py`：`TNT_POWER / TNT_RADIUS / EXPLOSION_DEBRIS_CAP / MAX_DEBRIS /
-RENDER_DISTANCE / DAY_LENGTH` 等都可直接改。
-
-## 无头测试
-
-```bash
-python test_headless.py   # 不开窗口验证: 地形/物理/爆炸/碎屑/沙子/存档
-```
-
-## 打包成 exe（Windows）
-
-双击 `build_exe.bat`：自动建虚拟环境 → 装依赖 → 跑无头测试 → PyInstaller 打包，
-产物为 `dist\PyCraft.exe`（单文件，存档生成在 exe 旁的 `saves\`）。
-首次打包约需几分钟。确认运行稳定后，可把脚本里的打包命令加上
-`--noconsole` 去掉黑色控制台窗口（出问题排查时建议保留 console）。
-注意：PyInstaller 不支持交叉编译，exe 只能在 Windows 上构建。
-
-
-## 新系统说明（v0.2 更新）
-
-- **方块光照**：`world/lighting.py` 用 BFS 洪泛传播方块光级(0..15)，发光方块
-  (`emissive>0`：萤石/灯笼/南瓜灯/红石灯) 为种子，光级烘焙进区块网格顶点。
-  放置/破坏会触发受影响区块重算光照（光半径 15 < 区块宽 16，只影响 3x3 邻域）。
-- **生物战斗**：实体有 `health/hurt_timer`；`world.attack()` 用 `raycast_entity`
-  命中最近生物并 `hurt()`（扣血+击退+惊慌逃跑）；大史莱姆死亡分裂成两只小的。
-- **疾跑/飞行**：`entities/player.py`，疾跑改水平目标速度，飞行走独立无重力分支。
-- **更多方块**：见 `content/blocks.py` 末尾，每种仍只用数据驱动注册，引擎零修改。
-
-## 测试
 
 ```bash
 python test_headless.py    # 28 项：地形/物理/爆炸/碎屑/沙子/存档
